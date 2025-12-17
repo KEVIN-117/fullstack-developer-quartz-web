@@ -1,0 +1,17 @@
+@use "./base.scss";
+
+// put your custom CSS here!
+.page-banner {
+    height: 200px; // Ajusta a tu gusto, e.g., 300px para más grande
+    width: 100%;
+    margin-bottom: 20px; // Espacio antes del contenido
+    border-radius: 8px; // Bordes redondeados como en Obsidian
+    overflow: hidden; // Para que no se desborde
+}
+
+// Opcional: Responsive
+@media (max-width: 768px) {
+    .page-banner {
+        height: 150px;
+    }
+}
