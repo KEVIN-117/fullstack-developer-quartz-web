@@ -56,11 +56,6 @@ jobs:
         run: npm run build
       - name: List files
         run: ls -la
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: preview-build
-          path: public
   # Single deploy job since we're just deploying
   deploy:
     needs: build-preview
@@ -69,10 +64,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: preview-build
+      - name: Ls preview build
+        run: ls -la
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Pages
