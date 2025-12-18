@@ -53,9 +53,9 @@ jobs:
         run: npm run check
 
       - name: Build Quartz
-        run: |
-          npm run build
-          ls -la
+        run: npx quartz build -d content -v
+      - name: List files
+        run: ls -la
       - name: Upload build artifact
         uses: actions/upload-artifact@v5
         with:
