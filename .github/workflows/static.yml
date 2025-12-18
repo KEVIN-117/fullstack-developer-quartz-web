@@ -53,7 +53,7 @@ jobs:
         run: npm run check
 
       - name: Build Quartz
-        run: npx quartz build -d content -v
+        run: npm run build -- -d content -v
       - name: List files
         run: ls -la
       - name: Upload build artifact
