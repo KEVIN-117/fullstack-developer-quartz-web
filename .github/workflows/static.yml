@@ -5,10 +5,10 @@ on:
   push:
     branches: ["main"]
 
-  workflow_run:
-    workflows: ["Build Preview Deployment"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["Build Preview Deployment"]
+  #   types:
+  #     - completed
 
   workflow_dispatch:
 
@@ -22,8 +22,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-preview:
+    if: ${{ github.repository == 'KEVIN-117/fullstack-developer-quartz-web' }}
+    runs-on: ubuntu-latest
+    name: Build Preview
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci
+
+      - name: Check types and style
+        run: npm run check
+
+      - name: Build Quartz
+        run: npx quartz build -d docs -v
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: preview-build
+          path: public
   # Single deploy job since we're just deploying
   deploy:
+    needs: build-preview
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -37,7 +73,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: "./public"
+          path: "/public"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
