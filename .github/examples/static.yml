@@ -1,0 +1,107 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ["main"]
+
+  # workflow_run:
+  #   workflows: ["Build Preview Deployment"]
+  #   types:
+  #     - completed
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # build-preview:
+  #   if: ${{ github.repository == 'KEVIN-117/fullstack-developer-quartz-web' }}
+  #   runs-on: ubuntu-latest
+  #   name: Build Preview
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
+
+  #     - name: Cache dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-node-
+
+  #     - run: npm ci
+
+  #     - name: Format code
+  #       run: npm run format
+
+  #     - name: Check types and style
+  #       run: npm run check
+
+  #     - name: Build Quartz
+  #       run: npm run build
+  #     - name: List files
+  #       run: ls -la
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci
+
+      - name: Format code
+        run: npm run format
+
+      - name: Check types and style
+        run: npm run check
+
+      - name: Build Quartz
+        run: npm run build
+      - name: List files
+        run: ls -la
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Ls preview build
+        run: ls -la ./public
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: "public"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
