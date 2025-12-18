@@ -46,6 +46,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Format code
+        run: npm run format
+
       - name: Check types and style
         run: npm run check
 
