@@ -6,7 +6,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "node ./quartz/bootstrap-cli.mjs build -d content -v",
+    "build": "node ./quartz/bootstrap-cli.mjs build -d obsidian -v",
     "quartz": "./quartz/bootstrap-cli.mjs",
     "docs": "npx quartz build --serve -d docs",
     "check": "tsc --noEmit && npx prettier . --check",
