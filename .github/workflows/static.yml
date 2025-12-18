@@ -53,10 +53,10 @@ jobs:
       - name: Show Node.js version (debugging)
         run: node -v
 
-      - name: Show content directory before build (debugging)
+      - name: Show obsidian directory before build (debugging)
         run: |
           echo "Contenido del directorio antes del build:"
-          ls -la content
+          ls -la obsidian
 
       - name: Build Quartz site
         run: npm run build
