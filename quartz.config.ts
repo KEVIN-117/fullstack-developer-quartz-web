@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "es-ES",
-    baseUrl: "kevin-117.github.io/fullstack-developer-quartz-web", // URL (e.g., username.github.io/repo)
+    baseUrl: "https://kevin-117.github.io/fullstack-developer-quartz-web/", // URL (e.g., username.github.io/repo)
     ignorePatterns: [
       "private",
       "templates",
@@ -83,7 +83,6 @@ const config: QuartzConfig = {
       Plugin.Description(),
       Plugin.Latex({ renderEngine: "katex" }),
       Plugin.Assets(),
-      Plugin.Banner(),
     ],
     filters: [Plugin.RemoveDrafts()],
     emitters: [
