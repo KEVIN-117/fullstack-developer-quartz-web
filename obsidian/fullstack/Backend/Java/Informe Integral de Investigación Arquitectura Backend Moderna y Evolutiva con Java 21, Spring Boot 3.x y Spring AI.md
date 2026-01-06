@@ -5,6 +5,7 @@ aliases:
 sticker: lucide//coffee
 banner: assets/ether-bg.jpeg
 ---
+
 # **Módulo 0: Introducción a la Programación Moderna y la Evolución de la JVM**
 
 La base de cualquier sistema backend robusto reside en una comprensión profunda de su entorno de ejecución. Java ha evolucionado de ser un lenguaje puramente orientado a objetos a un ecosistema multiparadigma que equilibra la legibilidad, el rendimiento y la seguridad de tipos.
@@ -35,11 +36,11 @@ A diferencia del switch tradicional, las expresiones switch modernas eliminan la
 
 ```Java
 
-// Ejemplo de Switch Expression exhaustivo con sintaxis de flecha  
-var tipoDia = switch (dia) {  
- case LUNES, VIERNES -> "Inicio/Fin de semana laboral";  
- case SABADO, DOMINGO -> "Fin de semana";  
- default -> throw new IllegalArgumentException("Día inválido: " + dia);  
+// Ejemplo de Switch Expression exhaustivo con sintaxis de flecha
+var tipoDia = switch (dia) {
+ case LUNES, VIERNES -> "Inicio/Fin de semana laboral";
+ case SABADO, DOMINGO -> "Fin de semana";
+ default -> throw new IllegalArgumentException("Día inválido: " + dia);
 };
 ```
 
@@ -56,12 +57,12 @@ La manipulación de cadenas multilínea (JSON, SQL, HTML) en Java pre-15 era pro
 
 ```Java
 
-// Ejemplo de Text Block para un JSON de Prompt de IA  
-String promptJson = """  
- {  
- "role": "user",  
- "content": "Explica la teoría de la relatividad"  
- }  
+// Ejemplo de Text Block para un JSON de Prompt de IA
+String promptJson = """
+ {
+ "role": "user",
+ "content": "Explica la teoría de la relatividad"
+ }
  """;
 ```
 
@@ -100,25 +101,28 @@ La línea entre interfaces y clases abstractas se ha difuminado desde Java 8, pe
 
 La traducción precisa de relaciones UML a Java es vital para la integridad referencial y el ciclo de vida de los objetos.1
 
-1. **Asociación:** Relación "usa un". El objeto A tiene una referencia al objeto B, pero sus ciclos de vida son independientes.  
-   ```Java  
+1. **Asociación:** Relación "usa un". El objeto A tiene una referencia al objeto B, pero sus ciclos de vida son independientes.
+
+   ```Java
    public class Profesor { private Curso curso; } // Referencia débil
    ```
 
-2. **Composición:** Relación "parte de" fuerte. Si el padre muere, el hijo también.  
-   ```Java  
-   public class Casa {  
-    private final List<Habitacion> habitaciones = new ArrayList<>();  
-    // Las habitaciones no existen sin la casa  
+2. **Composición:** Relación "parte de" fuerte. Si el padre muere, el hijo también.
+
+   ```Java
+   public class Casa {
+    private final List<Habitacion> habitaciones = new ArrayList<>();
+    // Las habitaciones no existen sin la casa
    }
    ```
 
-3. **Agregación:** Relación "parte de" débil. El hijo puede sobrevivir al padre.  
-  ``` Java  
-   public class Departamento {  
-    private List<Profesor> profesores; // Profesores pueden cambiar de depto  
-   }
-  ```
+3. **Agregación:** Relación "parte de" débil. El hijo puede sobrevivir al padre.
+
+```Java
+ public class Departamento {
+  private List<Profesor> profesores; // Profesores pueden cambiar de depto
+ }
+```
 
 ### **Pruebas Unitarias con JUnit 5: El Patrón AAA**
 
@@ -130,14 +134,14 @@ La calidad del software moderno depende de pruebas automatizadas. JUnit 5 (Jupit
 
 ```Java
 
-@Test  
-void testCalculadoraSuma() {  
- // Arrange  
- Calculadora calc = new Calculadora();  
- // Act  
- int resultado = calc.sumar(2, 3);  
- // Assert  
- assertEquals(5, resultado, "La suma debe ser 5");  
+@Test
+void testCalculadoraSuma() {
+ // Arrange
+ Calculadora calc = new Calculadora();
+ // Act
+ int resultado = calc.sumar(2, 3);
+ // Assert
+ assertEquals(5, resultado, "La suma debe ser 5");
 }
 ```
 
@@ -189,6 +193,7 @@ Los genéricos permiten la abstracción sobre tipos.
   - Si solo _lees_ de una estructura (Productor), usa `<? extends T>`.
   - Si solo _escribes_ en una estructura (Consumidor), usa `<? super T>`.
   - Esto maximiza la flexibilidad de las `APIs` de colecciones.1
+
 ### **Programación Funcional y `Streams` API**
 
 Desde Java 8, el paradigma funcional permite un procesamiento de datos declarativo y paralelizable.
@@ -200,14 +205,15 @@ Desde Java 8, el paradigma funcional permite un procesamiento de datos declarati
 
 ```Java
 
-// Ejemplo de Pipeline Funcional  
-List<String> nombresMayusculas = usuarios.stream()  
- .filter(u -> u.getEdad() > 18) // Predicate  
- .map(Usuario::getNombre) // Function (Reference Method)  
- .map(String::toUpperCase) // Transformación  
+// Ejemplo de Pipeline Funcional
+List<String> nombresMayusculas = usuarios.stream()
+ .filter(u -> u.getEdad() > 18) // Predicate
+ .map(Usuario::getNombre) // Function (Reference Method)
+ .map(String::toUpperCase) // Transformación
  .collect(Collectors.toList()); // Terminal
 
 ```
+
 ---
 
 # **Módulo 4: Java 21 y Características Modernas Avanzadas**
@@ -232,8 +238,8 @@ Actualmente en _preview_, esta API trata múltiples tareas concurrentes relacion
 
 ```Java
 
-try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {  
- Supplier<String> user = scope.fork(() -> findUser(id));  
+try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+ Supplier<String> user = scope.fork(() -> findUser(id));
  Supplier<Order> order = scope.fork(() -> fetchOrder(id));
 
     scope.join().throwIfFailed(); // Espera a ambos, falla si uno falla
@@ -251,9 +257,9 @@ Los **Records** (Java 14+) son clases inmutables transparentes. Java 21 mejora s
 
 ```Java
 
-// Pattern Matching con Records  
-if (obj instanceof Point(int x, int y)) {  
- System.out.println("X: " + x + ", Y: " + y);  
+// Pattern Matching con Records
+if (obj instanceof Point(int x, int y)) {
+ System.out.println("X: " + x + ", Y: " + y);
 }
 ```
 
@@ -277,16 +283,16 @@ Introducido en Java 11, reemplaza a la antigua HttpURLConnection. Soporta HTTP/1
 
 ```Java
 
-HttpClient client = HttpClient.newHttpClient();  
-HttpRequest request = HttpRequest.newBuilder()  
- .uri(URI.create("https://api.ejemplo.com/data"))  
- .GET()  
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+ .uri(URI.create("https://api.ejemplo.com/data"))
+ .GET()
  .build();
 
-// Retorna CompletableFuture  
-client.sendAsync(request, BodyHandlers.ofString())  
- .thenApply(HttpResponse::body)  
- .thenAccept(System.out::println)  
+// Retorna CompletableFuture
+client.sendAsync(request, BodyHandlers.ofString())
+ .thenApply(HttpResponse::body)
+ .thenAccept(System.out::println)
  .join(); // Esperar finalización (solo para demo)
 ```
 
@@ -298,14 +304,14 @@ Java incluye un servidor HTTP ligero ideal para pruebas, prototipos o microservi
 
 ```Java
 
-HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);  
-server.createContext("/api/hello", exchange -> {  
- String resp = "Hola Mundo Java";  
- exchange.sendResponseHeaders(200, resp.getBytes().length);  
- try (OutputStream os = exchange.getResponseBody()) {  
- os.write(resp.getBytes());  
- }  
-});  
+HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+server.createContext("/api/hello", exchange -> {
+ String resp = "Hola Mundo Java";
+ exchange.sendResponseHeaders(200, resp.getBytes().length);
+ try (OutputStream os = exchange.getResponseBody()) {
+ os.write(resp.getBytes());
+ }
+});
 server.start();
 ```
 
@@ -332,17 +338,17 @@ Spring Boot 3 adopta el estándar **RFC 7807** para respuestas de error. En luga
 
 ```Java
 
-@RestControllerAdvice  
-public class GlobalExceptionHandler {  
- @ExceptionHandler(RecursoNoEncontradoException.class)  
- public ProblemDetail handleNotFound(RecursoNoEncontradoException ex) {  
- ProblemDetail pd = ProblemDetail.forStatusAndDetail(  
- HttpStatus.NOT_FOUND, ex.getMessage());  
- pd.setTitle("Recurso No Encontrado");  
- pd.setType(URI.create("https://api.miap.com/errors/not-found"));  
- pd.setProperty("timestamp", Instant.now()); // Metadatos extra  
- return pd;  
- }  
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+ @ExceptionHandler(RecursoNoEncontradoException.class)
+ public ProblemDetail handleNotFound(RecursoNoEncontradoException ex) {
+ ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+ HttpStatus.NOT_FOUND, ex.getMessage());
+ pd.setTitle("Recurso No Encontrado");
+ pd.setType(URI.create("https://api.miap.com/errors/not-found"));
+ pd.setProperty("timestamp", Instant.now()); // Metadatos extra
+ return pd;
+ }
 }
 ```
 
@@ -354,10 +360,10 @@ Los Java Records son ideales para DTOs (Data Transfer Objects) debido a su inmut
 
 ```Java
 
-public record UsuarioRegistroDto(  
- @NotBlank(message = "El nombre es obligatorio") String nombre,  
- @Email(message = "Email inválido") String email,  
- @Size(min = 8) String password  
+public record UsuarioRegistroDto(
+ @NotBlank(message = "El nombre es obligatorio") String nombre,
+ @Email(message = "Email inválido") String email,
+ @Size(min = 8) String password
 ) {}
 ```
 
@@ -383,12 +389,12 @@ Para evitar el problema de "fetching" excesivo (traer columnas innecesarias), Sp
 
 ```Java
 
-// Record Proyección: Solo trae lo necesario  
+// Record Proyección: Solo trae lo necesario
 public record InfoBasicaUsuario(String nombre, String email) {}
 
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {  
- // Spring Data optimiza la query SELECT nombre, email FROM...  
- List<InfoBasicaUsuario> findByActivoTrue();  
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+ // Spring Data optimiza la query SELECT nombre, email FROM...
+ List<InfoBasicaUsuario> findByActivoTrue();
 }
 ```
 
@@ -400,7 +406,7 @@ Para lógica compleja en base de datos, JPA permite mapear procedimientos almace
 
 ```Java
 
-@Procedure(procedureName = "calcular_impuestos")  
+@Procedure(procedureName = "calcular_impuestos")
 BigDecimal calcularImpuestos(Long usuarioId);
 ```
 
@@ -435,17 +441,17 @@ En arquitecturas REST modernas, se prefiere la autenticación sin estado (Statel
 
 ```Java
 
-@Bean  
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {  
- http  
- .csrf(AbstractHttpConfigurer::disable)  
- .authorizeHttpRequests(auth -> auth  
- .requestMatchers("/auth/**").permitAll()  
- .anyRequest().authenticated()  
- )  
- .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  
- .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);  
- return http.build();  
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+ http
+ .csrf(AbstractHttpConfigurer::disable)
+ .authorizeHttpRequests(auth -> auth
+ .requestMatchers("/auth/**").permitAll()
+ .anyRequest().authenticated()
+ )
+ .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+ .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+ return http.build();
 }
 ```
 
@@ -549,10 +555,10 @@ ChatClient ofrece una API fluida para interactuar con modelos (OpenAI, Ollama, A
 
 ```Java
 
-String respuesta = chatClient.prompt()  
- .system("Eres un asistente experto en Java.")  
- .user(u -> u.text("Explica el concepto de {concepto}").param("concepto", "Virtual Threads"))  
- .call()  
+String respuesta = chatClient.prompt()
+ .system("Eres un asistente experto en Java.")
+ .user(u -> u.text("Explica el concepto de {concepto}").param("concepto", "Virtual Threads"))
+ .call()
  .content();
 ```
 
@@ -591,7 +597,7 @@ La convergencia de **Java 21**, **Spring Boot 3.x** y **Spring AI** define un nu
 
 #### **Fuentes citadas**
 
-1. f898cfdc-9874-481a-8114-34cf300468ee_Java_21__Spring_Boot_Backend_Developer.pdf
+1. f898cfdc-9874-481a-8114-34cf300468ee_Java_21\_\_Spring_Boot_Backend_Developer.pdf
 2. Problem Detail in Spring Boot REST API with Examples | Learn Code With Durgesh, acceso: enero 4, 2026, [https://learncodewithdurgesh.com/tutorials/spring-boot-tutorials/problem-detail-in-spring-boot-rest-api-with-examples](https://learncodewithdurgesh.com/tutorials/spring-boot-tutorials/problem-detail-in-spring-boot-rest-api-with-examples)
 3. Unit Testing Rest Services with Spring Boot and JUnit - in28minutes, acceso: enero 4, 2026, [https://www.springboottutorial.com/unit-testing-for-spring-boot-rest-services](https://www.springboottutorial.com/unit-testing-for-spring-boot-rest-services)
 4. Unit Testing in Spring Boot Project using Mockito and Junit - GeeksforGeeks, acceso: enero 4, 2026, [https://www.geeksforgeeks.org/advance-java/unit-testing-in-spring-boot-project-using-mockito-and-junit/](https://www.geeksforgeeks.org/advance-java/unit-testing-in-spring-boot-project-using-mockito-and-junit/)

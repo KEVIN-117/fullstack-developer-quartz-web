@@ -1,6 +1,7 @@
 ---
 sticker: lucide//file-text
 ---
+
 ## **Resumen Ejecutivo**
 
 El presente informe técnico ofrece un análisis exhaustivo, crítico y práctico de la obra "`Gray Hat C#: A Hacker's Guide to Creating and Automating Security Tools`" de Brandon Perry.1 En el contexto actual de la ciberseguridad, donde la velocidad de respuesta y la adaptabilidad son críticas, la capacidad de desarrollar herramientas personalizadas trasciende la mera habilidad técnica para convertirse en una necesidad operativa. Este documento desglosa los catorce capítulos del libro, diseccionando la arquitectura de código, los fundamentos teóricos subyacentes y las implicaciones de seguridad de cada herramienta desarrollada.
@@ -11,7 +12,7 @@ El informe adopta un enfoque de "Gray Hat" (Sombrero Gris), situándose en la in
 
 # **Capítulo 1: Fundamentos de C\# y Arquitectura de Sistemas para Seguridad**
 
-El primer capítulo establece la infraestructura intelectual necesaria para el desarrollo de herramientas de seguridad. Se aleja de la introducción trivial a la sintaxis para centrarse en cómo el *Common Language Runtime* (CLR) y el framework.NET (específicamente la implementación Mono en entornos Linux/macOS) pueden ser instrumentados para interactuar a bajo nivel con el sistema operativo.1
+El primer capítulo establece la infraestructura intelectual necesaria para el desarrollo de herramientas de seguridad. Se aleja de la introducción trivial a la sintaxis para centrarse en cómo el _Common Language Runtime_ (CLR) y el framework.NET (específicamente la implementación Mono en entornos Linux/macOS) pueden ser instrumentados para interactuar a bajo nivel con el sistema operativo.1
 
 ### **El Entorno de Desarrollo y la Compilación Just-In-Time (JIT)**
 
@@ -24,17 +25,17 @@ El autor destaca el uso de Mono para garantizar la portabilidad multiplataforma.
 ```C#
 using System;
 
-namespace Ch1_HelloWorld  
-{  
-    class MainClass  
-    {  
-        public static void Main(string args)  
-        {  
-            string hello = "Hello World\!";  
-            DateTime now = DateTime.Now;  
-            Console.WriteLine(hello + " La fecha es " + now.ToLongDateString());  
-        }  
-    }  
+namespace Ch1_HelloWorld
+{
+    class MainClass
+    {
+        public static void Main(string args)
+        {
+            string hello = "Hello World\!";
+            DateTime now = DateTime.Now;
+            Console.WriteLine(hello + " La fecha es " + now.ToLongDateString());
+        }
+    }
 }
 ```
 
@@ -47,20 +48,20 @@ El diseño de herramientas de seguridad robustas requiere un dominio de la heren
 Abstracción y Herencia:  
 Se presenta el ejemplo de una clase abstracta `PublicServant` y una interfaz IPerson.
 
-* **Clases Abstractas:** `PublicServant` define propiedades base como `PensionAmount` y métodos abstractos como `DriveToPlaceOfInterest()`. En un contexto de malware, esto sería análogo a una clase base `NetworkConnection` que define métodos abstractos como `Connect()` y `Send()`, obligando a las clases derivadas (`TcpConnection`, `UdpConnection`) a implementar la lógica específica del protocolo.
-* **Interfaces:** La interfaz `IPerson` define un contrato (propiedades Name y Age) que cualquier clase implementadora debe cumplir. Esto permite tratar objetos dispares (un `Firefighter` y un `PoliceOfficer`) de manera polimórfica.
+- **Clases Abstractas:** `PublicServant` define propiedades base como `PensionAmount` y métodos abstractos como `DriveToPlaceOfInterest()`. En un contexto de malware, esto sería análogo a una clase base `NetworkConnection` que define métodos abstractos como `Connect()` y `Send()`, obligando a las clases derivadas (`TcpConnection`, `UdpConnection`) a implementar la lógica específica del protocolo.
+- **Interfaces:** La interfaz `IPerson` define un contrato (propiedades Name y Age) que cualquier clase implementadora debe cumplir. Esto permite tratar objetos dispares (un `Firefighter` y un `PoliceOfficer`) de manera polimórfica.
 
 ```C#
-public abstract class PublicServant  
-{  
-    public int PensionAmount { get; set; }  
-    public abstract void DriveToPlaceOfInterest();  
+public abstract class PublicServant
+{
+    public int PensionAmount { get; set; }
+    public abstract void DriveToPlaceOfInterest();
 }
 
-public interface IPerson  
-{  
-    string Name { get; set; }  
-    int Age { get; set; }  
+public interface IPerson
+{
+    string Name { get; set; }
+    int Age { get; set; }
 }
 ```
 
@@ -69,23 +70,24 @@ Esta arquitectura permite que un "Manager" o controlador central itere sobre una
 ### **Delegados, Métodos Anónimos y Eventos**
 
 Una característica poderosa discutida es el uso de **delegados** y **métodos anónimos**. Los delegados actúan como punteros a funciones con seguridad de tipos.
+
 ```C#
 
-public delegate void DriveToPlaceOfInterestDelegate();  
+public delegate void DriveToPlaceOfInterestDelegate();
 public DriveToPlaceOfInterestDelegate DriveToPlaceOfInterest { get; set; }
 ```
 
 El uso de delegate permite asignar lógica dinámicamente en tiempo de ejecución. En el ejemplo del libro, el comportamiento de un oficial de policía cambia dinámicamente si hay una emergencia (HasEmergency), asignando un bloque de código diferente al delegado sin necesidad de recompilar la clase.
 
-*Implicación Táctica:* En malware avanzado, los delegados permiten el polimorfismo de comportamiento en tiempo de ejecución. Un implante podría recibir código C\# serializado desde un servidor C2, compilarlo en memoria y asignar ese nuevo método a un delegado existente, alterando su funcionalidad sin tocar el disco y evadiendo firmas estáticas.
+_Implicación Táctica:_ En malware avanzado, los delegados permiten el polimorfismo de comportamiento en tiempo de ejecución. Un implante podría recibir código C\# serializado desde un servidor C2, compilarlo en memoria y asignar ese nuevo método a un delegado existente, alterando su funcionalidad sin tocar el disco y evadiendo firmas estáticas.
 
 ### **Interacción con Código No Administrado (P/Invoke)**
 
-La sección más crítica para el desarrollo de exploits es *Platform Invoke* (P/Invoke). P/Invoke permite al código administrado de C\# llamar a funciones no administradas en librerías dinámicas (DLLs en Windows o .so en Linux/Unix).
+La sección más crítica para el desarrollo de exploits es _Platform Invoke_ (P/Invoke). P/Invoke permite al código administrado de C\# llamar a funciones no administradas en librerías dinámicas (DLLs en Windows o .so en Linux/Unix).
 
 Importancia Operativa:  
 El framework.NET no cubre todas las capacidades del sistema operativo. Para realizar inyección de código, manipulación directa de memoria o interacción con hardware, es necesario invocar la API nativa (Win32 API o libc).  
-*Ejemplo de Implementación:*
+_Ejemplo de Implementación:_
 
 ```C#
 
@@ -98,17 +100,17 @@ El atributo instruye al runtime para cargar la librería externa y localizar el 
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 1**
 
-1. **Reflexión y Carga Dinámica de Payloads:**  
-   * *Objetivo:* Comprender las técnicas de "fileless malware".  
-   * *Tarea:* Investigue el espacio de nombres System.Reflection. Escriba un programa ("Loader") que descargue un ensamblado.NET (DLL compilada) desde un servidor web a un array de bytes (byte) en memoria. Utilice Assembly.Load para cargar este array y Activator.CreateInstance junto con MethodInfo.Invoke para ejecutar un método específico dentro de esa DLL sin que el archivo toque nunca el disco físico.  
-   * *Investigación:* Analice cómo AMSI (Antimalware Scan Interface) inspecciona las llamadas a Assembly.Load en versiones modernas de Windows.  
-2. **P/Invoke Transversal y Evasión:**  
-   * *Objetivo:* Dominar la interoperabilidad avanzada.  
-   * *Tarea:* Escriba una clase estática NativeMethods que abstraiga las diferencias entre Linux y Windows. Implemente una función GetProccessID que, mediante P/Invoke, llame a getpid() en Linux (libc) o GetCurrentProcessId() en Windows (kernel32.dll) dinámicamente.  
-   * *Reto:* Implemente ofuscación de nombres de funciones en la declaración DllImport (usando EntryPoint) para dificultar el análisis estático.  
-3. **Sistema de Eventos Asíncronos para C2:**  
-   * *Objetivo:* Programación orientada a eventos para comunicaciones de red.  
-   * *Tarea:* Diseñe un sistema de delegados y eventos (EventHandler) que simule un servidor C2. Cree una clase Bot que dispare un evento OnCommandReceived. El programa principal debe suscribirse a este evento con un método anónimo que ejecute el comando simulado.
+1. **Reflexión y Carga Dinámica de Payloads:**
+   - _Objetivo:_ Comprender las técnicas de "fileless malware".
+   - _Tarea:_ Investigue el espacio de nombres System.Reflection. Escriba un programa ("Loader") que descargue un ensamblado.NET (DLL compilada) desde un servidor web a un array de bytes (byte) en memoria. Utilice Assembly.Load para cargar este array y Activator.CreateInstance junto con MethodInfo.Invoke para ejecutar un método específico dentro de esa DLL sin que el archivo toque nunca el disco físico.
+   - _Investigación:_ Analice cómo AMSI (Antimalware Scan Interface) inspecciona las llamadas a Assembly.Load en versiones modernas de Windows.
+2. **P/Invoke Transversal y Evasión:**
+   - _Objetivo:_ Dominar la interoperabilidad avanzada.
+   - _Tarea:_ Escriba una clase estática NativeMethods que abstraiga las diferencias entre Linux y Windows. Implemente una función GetProccessID que, mediante P/Invoke, llame a getpid() en Linux (libc) o GetCurrentProcessId() en Windows (kernel32.dll) dinámicamente.
+   - _Reto:_ Implemente ofuscación de nombres de funciones en la declaración DllImport (usando EntryPoint) para dificultar el análisis estático.
+3. **Sistema de Eventos Asíncronos para C2:**
+   - _Objetivo:_ Programación orientada a eventos para comunicaciones de red.
+   - _Tarea:_ Diseñe un sistema de delegados y eventos (EventHandler) que simule un servidor C2. Cree una clase Bot que dispare un evento OnCommandReceived. El programa principal debe suscribirse a este evento con un método anónimo que ejecute el comando simulado.
 
 ---
 
@@ -123,16 +125,16 @@ El autor introduce el concepto de **Fuzzing Mutacional**, una técnica que toma 
 Análisis de la Implementación en C\#:  
 El código utiliza HttpWebRequest y HttpWebResponse para gestionar el ciclo de vida HTTP. La lógica se divide en fases:
 
-1. **Parsing de URL:** El fuzzer descompone la cadena de consulta (query string) para aislar parámetros individuales.  
-2. **Generación de Vectores:** Se itera sobre cada parámetro (parm), generando versiones "tainted" (contaminadas) de la URL.  
-   * Para SQLi: Se añade una comilla simple ' (ej. id=1').  
-   * Para XSS: Se añade una cadena testigo \<xss\> (ej. name=Juan\<xss\>).  
+1. **Parsing de URL:** El fuzzer descompone la cadena de consulta (query string) para aislar parámetros individuales.
+2. **Generación de Vectores:** Se itera sobre cada parámetro (parm), generando versiones "tainted" (contaminadas) de la URL.
+   - Para SQLi: Se añade una comilla simple ' (ej. id=1').
+   - Para XSS: Se añade una cadena testigo \<xss\> (ej. name=Juan\<xss\>).
 3. **Detección de Anomalías:** Se analiza el cuerpo de la respuesta (StreamReader.ReadToEnd()) buscando firmas de error conocidas (ej. "error in your SQL syntax" para MySQL) o el reflejo del payload XSS sin sanitizar.
 
 ```C#
 
-// Lógica de detección simplificada  
-if (sqlresp.Contains("error in your SQL syntax"))  
+// Lógica de detección simplificada
+if (sqlresp.Contains("error in your SQL syntax"))
     Console.WriteLine("SQL injection point found in parameter: " \+ parm);
 ```
 
@@ -145,8 +147,8 @@ El capítulo avanza hacia vectores más complejos. Para peticiones POST, se mani
 Fuzzing de JSON:  
 Una adición crítica es el fuzzing de APIs RESTful que consumen JSON. El autor introduce Json.NET (Newtonsoft), una librería estándar de facto en.NET para manipular JSON.
 
-* **Algoritmo de Fuzzing Recursivo:** El código parsea el JSON a un JObject. Itera sobre cada par clave/valor. Si el valor es primitivo (string, int), lo clona y lo contamina con una comilla simple. Si es un objeto anidado, recursa.  
-* **Manejo de Tipos:** Es crucial notar que al inyectar ' en un campo entero (ej. age: 25 \-\> age: 25'), se puede romper el parser JSON antes de llegar a la base de datos. El fuzzer debe ser inteligente para distinguir errores de parsing (HTTP 400\) de errores de base de datos (HTTP 500).
+- **Algoritmo de Fuzzing Recursivo:** El código parsea el JSON a un JObject. Itera sobre cada par clave/valor. Si el valor es primitivo (string, int), lo clona y lo contamina con una comilla simple. Si es un objeto anidado, recursa.
+- **Manejo de Tipos:** Es crucial notar que al inyectar ' en un campo entero (ej. age: 25 \-\> age: 25'), se puede romper el parser JSON antes de llegar a la base de datos. El fuzzer debe ser inteligente para distinguir errores de parsing (HTTP 400\) de errores de base de datos (HTTP 500).
 
 ### **Desarrollo de Exploits SQL: De la Detección a la Extracción**
 
@@ -155,29 +157,29 @@ El capítulo culmina con la programación de exploits completos para vulnerabili
 1\. SQLi Basada en UNION:  
 El objetivo es extraer datos arbitrarios combinando los resultados de la consulta original con resultados inyectados. El desafío técnico es determinar el número de columnas de la consulta original para que el UNION coincida.
 
-* *Técnica:* El exploit itera incrementando NULLs en la sentencia UNION SELECT hasta que el servidor responde con éxito (HTTP 200).  
-* *Extracción:* Se utilizan marcadores hexadecimales aleatorios para envolver los datos extraídos (ej. CONCAT(0xAA, username, 0xBB)). Luego, mediante expresiones regulares (Regex), el código C\# extrae el texto entre los marcadores, obteniendo limpiamente los datos de la base de datos.
+- _Técnica:_ El exploit itera incrementando NULLs en la sentencia UNION SELECT hasta que el servidor responde con éxito (HTTP 200).
+- _Extracción:_ Se utilizan marcadores hexadecimales aleatorios para envolver los datos extraídos (ej. CONCAT(0xAA, username, 0xBB)). Luego, mediante expresiones regulares (Regex), el código C\# extrae el texto entre los marcadores, obteniendo limpiamente los datos de la base de datos.
 
 2\. SQLi Ciega (Boolean-Based):  
 Cuando la aplicación suprime los errores, se utiliza inferencia lógica. El exploit C\# implementa un algoritmo de extracción carácter a carácter.
 
-* **Oráculo:** Se construye una función MakeRequest(payload) que devuelve true si la página carga normalmente y false si falta contenido o da error.  
-* **Inferencia:** Se inyectan condiciones lógicas (ej. AND ASCII(SUBSTRING(password, 1, 1)) \> 100). Basándose en la respuesta del oráculo, el programa deduce el valor de cada byte de la información objetivo.
+- **Oráculo:** Se construye una función MakeRequest(payload) que devuelve true si la página carga normalmente y false si falta contenido o da error.
+- **Inferencia:** Se inyectan condiciones lógicas (ej. AND ASCII(SUBSTRING(password, 1, 1)) \> 100). Basándose en la respuesta del oráculo, el programa deduce el valor de cada byte de la información objetivo.
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 2**
 
-1. **Fuzzing Asíncrono de Alto Rendimiento:**  
-   * *Tarea:* El código del libro es síncrono (bloqueante). Reescriba el fuzzer HTTP utilizando HttpClient (moderno, reemplazo de HttpWebRequest) y el patrón async/await con Task.WhenAll.  
-   * *Objetivo:* Lograr realizar cientos de peticiones por segundo concurrentes contra una instancia local de BadStore o DVWA (Damn Vulnerable Web App).  
-2. **Motor de Evasión de WAF (Web Application Firewall):**  
-   * *Tarea:* Modifique la clase generadora de payloads SQL para incluir un "Tamper Interface". Implemente métodos que ofusquen el payload antes de enviarlo:  
-     * Reemplazar espacios con comentarios /\*\*/.  
-     * Usar codificación URL doble o triple.  
-     * Variar mayúsculas/minúsculas (UnIoN SeLeCt).  
-   * *Investigación:* Estudie cómo herramientas como SQLMap gestionan los scripts de tamper.  
-3. **Explotación de Time-Based Blind SQLi:**  
-   * *Tarea:* Implemente un módulo para el explotador que utilice inyecciones basadas en tiempo (WAITFOR DELAY en MSSQL o SLEEP() en MySQL).  
-   * *Implementación:* Utilice la clase System.Diagnostics.Stopwatch para medir con precisión de milisegundos el tiempo de respuesta. Si el tiempo excede un umbral (ej. 5 segundos), infiera que la condición inyectada es VERDADERA.
+1. **Fuzzing Asíncrono de Alto Rendimiento:**
+   - _Tarea:_ El código del libro es síncrono (bloqueante). Reescriba el fuzzer HTTP utilizando HttpClient (moderno, reemplazo de HttpWebRequest) y el patrón async/await con Task.WhenAll.
+   - _Objetivo:_ Lograr realizar cientos de peticiones por segundo concurrentes contra una instancia local de BadStore o DVWA (Damn Vulnerable Web App).
+2. **Motor de Evasión de WAF (Web Application Firewall):**
+   - _Tarea:_ Modifique la clase generadora de payloads SQL para incluir un "Tamper Interface". Implemente métodos que ofusquen el payload antes de enviarlo:
+     - Reemplazar espacios con comentarios /\*\*/.
+     - Usar codificación URL doble o triple.
+     - Variar mayúsculas/minúsculas (UnIoN SeLeCt).
+   - _Investigación:_ Estudie cómo herramientas como SQLMap gestionan los scripts de tamper.
+3. **Explotación de Time-Based Blind SQLi:**
+   - _Tarea:_ Implemente un módulo para el explotador que utilice inyecciones basadas en tiempo (WAITFOR DELAY en MSSQL o SLEEP() en MySQL).
+   - _Implementación:_ Utilice la clase System.Diagnostics.Stopwatch para medir con precisión de milisegundos el tiempo de respuesta. Si el tiempo excede un umbral (ej. 5 segundos), infiera que la condición inyectada es VERDADERA.
 
 ---
 
@@ -192,9 +194,9 @@ El autor guía la construcción de un parser WSDL robusto utilizando System.Xml.
 Componentes del Parser:  
 Se implementa una clase WSDL que descompone el documento XML jerárquicamente:
 
-1. **Types y Messages:** Definen la estructura de datos (schema).  
-2. **PortTypes:** Definen las interfaces abstractas (operaciones).  
-3. **Bindings:** Definen el protocolo concreto (HTTP GET, POST o SOAP) y el formato.  
+1. **Types y Messages:** Definen la estructura de datos (schema).
+2. **PortTypes:** Definen las interfaces abstractas (operaciones).
+3. **Bindings:** Definen el protocolo concreto (HTTP GET, POST o SOAP) y el formato.
 4. **Services:** Definen los endpoints de red (URLs).
 
 El uso de **XPath** (/wsdl:definitions/wsdl:types/...) es crítico aquí para navegar eficientemente por el DOM del XML y extraer nodos específicos ignorando la verbosidad del documento.
@@ -208,8 +210,8 @@ Para los puertos SOAP, el código utiliza LINQ to XML (XDocument, XElement, XNam
 
 ```C#
 
-XNamespace soapNS \= "http://schemas.xmlsoap.org/soap/envelope/";  
-XElement soapBody \= new XElement(soapNS \+ "Body");  
+XNamespace soapNS \= "http://schemas.xmlsoap.org/soap/envelope/";
+XElement soapBody \= new XElement(soapNS \+ "Body");
 //... construcción dinámica de parámetros basada en el WSDL...
 ```
 
@@ -217,16 +219,16 @@ Este enfoque asegura que la estructura XML sea sintácticamente correcta, permit
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 3**
 
-1. **Soporte Multiversión (SOAP 1.1 vs 1.2):**  
-   * *Tarea:* El libro se centra en SOAP 1.1. Investigue las diferencias en la estructura del "Envelope" y las cabeceras HTTP (Content-Type: application/soap+xml vs text/xml) para SOAP 1.2. Actualice la clase SoapBinding para detectar la versión y ajustar la generación del XML adecuadamente.  
-2. **Inyección de Entidades Externas XML (XXE):**  
-   * *Tarea:* Amplíe el fuzzer para probar vulnerabilidades XXE. Modifique la generación del XDocument para inyectar una definición DOCTYPE maliciosa antes del elemento raíz.  
-   * *Payload:* El payload debe intentar definir una entidad que haga referencia a un archivo local (ej. file:///etc/passwd o c:/windows/win.ini) y usar esa entidad dentro de un parámetro del cuerpo SOAP.  
-3. **Fuzzing de Lógica de Negocio (IDOR/Logic Flaws):**  
-   * *Tarea:* Modifique el fuzzer para que, en lugar de caracteres de inyección, intente manipulaciones lógicas:  
-     * Enviar números negativos en campos de cantidad.  
-     * Enviar IDs de usuario secuenciales para detectar IDOR (Insecure Direct Object References).  
-     * Enviar valores extremos (Integer Overflow) en campos numéricos definidos en el esquema XSD.
+1. **Soporte Multiversión (SOAP 1.1 vs 1.2):**
+   - _Tarea:_ El libro se centra en SOAP 1.1. Investigue las diferencias en la estructura del "Envelope" y las cabeceras HTTP (Content-Type: application/soap+xml vs text/xml) para SOAP 1.2. Actualice la clase SoapBinding para detectar la versión y ajustar la generación del XML adecuadamente.
+2. **Inyección de Entidades Externas XML (XXE):**
+   - _Tarea:_ Amplíe el fuzzer para probar vulnerabilidades XXE. Modifique la generación del XDocument para inyectar una definición DOCTYPE maliciosa antes del elemento raíz.
+   - _Payload:_ El payload debe intentar definir una entidad que haga referencia a un archivo local (ej. file:///etc/passwd o c:/windows/win.ini) y usar esa entidad dentro de un parámetro del cuerpo SOAP.
+3. **Fuzzing de Lógica de Negocio (IDOR/Logic Flaws):**
+   - _Tarea:_ Modifique el fuzzer para que, en lugar de caracteres de inyección, intente manipulaciones lógicas:
+     - Enviar números negativos en campos de cantidad.
+     - Enviar IDs de usuario secuenciales para detectar IDOR (Insecure Direct Object References).
+     - Enviar valores extremos (Integer Overflow) en campos numéricos definidos en el esquema XSD.
 
 ---
 
@@ -240,22 +242,22 @@ Se implementan dos modelos de comunicación fundamentales:
 
 **Tabla 1: Comparación de Modelos de Payload**
 
-| Tipo | Descripción | Caso de Uso Táctico | Implementación C\# |
-| :---- | :---- | :---- | :---- |
-| **Connect-Back (Reverse)** | La víctima inicia la conexión hacia el atacante. | Evasión de firewalls NAT/Egress laxos. Salida común por puerto 443\. | TcpClient conectando a IP externa. |
-| **Bind Shell** | La víctima abre un puerto y espera conexión. | Persistencia interna o movimiento lateral. | TcpListener esperando en IPAddress.Any. |
+| Tipo                       | Descripción                                      | Caso de Uso Táctico                                                  | Implementación C\#                      |
+| :------------------------- | :----------------------------------------------- | :------------------------------------------------------------------- | :-------------------------------------- |
+| **Connect-Back (Reverse)** | La víctima inicia la conexión hacia el atacante. | Evasión de firewalls NAT/Egress laxos. Salida común por puerto 443\. | TcpClient conectando a IP externa.      |
+| **Bind Shell**             | La víctima abre un puerto y espera conexión.     | Persistencia interna o movimiento lateral.                           | TcpListener esperando en IPAddress.Any. |
 
 Redirección de Flujos (Streams):  
 La técnica clave para crear una shell funcional es la redirección de entrada/salida estándar. El código inicia un proceso (cmd.exe o /bin/bash) y "conecta" sus flujos al socket de red.
 
 ```C#
 
-Process prc \= new Process();  
-prc.StartInfo.FileName \= "cmd.exe";  
-prc.StartInfo.RedirectStandardInput \= true;  
-prc.StartInfo.RedirectStandardOutput \= true;  
-prc.StartInfo.UseShellExecute \= false; // Necesario para redirección  
-//... Conexión de streams...  
+Process prc \= new Process();
+prc.StartInfo.FileName \= "cmd.exe";
+prc.StartInfo.RedirectStandardInput \= true;
+prc.StartInfo.RedirectStandardOutput \= true;
+prc.StartInfo.UseShellExecute \= false; // Necesario para redirección
+//... Conexión de streams...
 prc.StandardOutput.BaseStream.CopyTo(networkStream);
 ```
 
@@ -265,23 +267,23 @@ El concepto más avanzado es la ejecución de shellcode nativo (generado por msf
 
 **Mecanismo en Windows (Win32 API):**
 
-1. **Allocation:** Usar VirtualAlloc (vía P/Invoke) para reservar un bloque de memoria con permisos PAGE\_EXECUTE\_READWRITE (0x40).  
-2. **Copy:** Usar Marshal.Copy para mover el array de bytes (shellcode) del heap administrado al bloque de memoria no administrado.  
+1. **Allocation:** Usar VirtualAlloc (vía P/Invoke) para reservar un bloque de memoria con permisos PAGE_EXECUTE_READWRITE (0x40).
+2. **Copy:** Usar Marshal.Copy para mover el array de bytes (shellcode) del heap administrado al bloque de memoria no administrado.
 3. **Execution:** Crear un delegado con la firma adecuada. Usar Marshal.GetDelegateForFunctionPointer para "castear" el puntero de memoria a un delegado ejecutable y luego invocarlo.
 
 Mecanismo en Linux (POSIX):  
-El proceso es análogo pero utiliza posix\_memalign para asignar memoria alineada a página y mprotect para cambiar los permisos de la página a ejecutable (PROT\_EXEC), invocando funciones de libc.1
+El proceso es análogo pero utiliza posix_memalign para asignar memoria alineada a página y mprotect para cambiar los permisos de la página a ejecutable (PROT_EXEC), invocando funciones de libc.1
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 4**
 
-1. **Stager Encriptado con Evasión AMSI:**  
-   * *Contexto:* Los antivirus modernos detectan patrones de shellcode de Metasploit.  
-   * *Tarea:* Desarrolle un "Stager". El payload (shellcode) debe estar encriptado (AES-256) dentro del ejecutable. El programa debe desencriptarlo en memoria solo milisegundos antes de ejecutarlo.  
-   * *Adicional:* Implemente un "AmsiBypass" básico parcheando la función AmsiScanBuffer en memoria antes de cargar el payload.  
-2. **Inyección de Procesos (Process Migration):**  
-   * *Tarea:* En lugar de ejecutar el shellcode en el propio proceso (que puede ser sospechoso), investigue cómo usar las APIs OpenProcess, VirtualAllocEx, WriteProcessMemory y CreateRemoteThread para inyectar y ejecutar el shellcode en un proceso legítimo del sistema (como notepad.exe o explorer.exe).  
-3. **Canal Encubierto sobre ICMP (Ping Tunneling):**  
-   * *Tarea:* Diseñe una shell reversa que no use TCP ni UDP. Utilice Sockets Raw (SocketType.Raw) en C\# para encapsular los comandos y las respuestas dentro del payload de paquetes ICMP Echo Request/Reply, evadiendo firewalls que solo inspeccionan capas superiores.
+1. **Stager Encriptado con Evasión AMSI:**
+   - _Contexto:_ Los antivirus modernos detectan patrones de shellcode de Metasploit.
+   - _Tarea:_ Desarrolle un "Stager". El payload (shellcode) debe estar encriptado (AES-256) dentro del ejecutable. El programa debe desencriptarlo en memoria solo milisegundos antes de ejecutarlo.
+   - _Adicional:_ Implemente un "AmsiBypass" básico parcheando la función AmsiScanBuffer en memoria antes de cargar el payload.
+2. **Inyección de Procesos (Process Migration):**
+   - _Tarea:_ En lugar de ejecutar el shellcode en el propio proceso (que puede ser sospechoso), investigue cómo usar las APIs OpenProcess, VirtualAllocEx, WriteProcessMemory y CreateRemoteThread para inyectar y ejecutar el shellcode en un proceso legítimo del sistema (como notepad.exe o explorer.exe).
+3. **Canal Encubierto sobre ICMP (Ping Tunneling):**
+   - _Tarea:_ Diseñe una shell reversa que no use TCP ni UDP. Utilice Sockets Raw (SocketType.Raw) en C\# para encapsular los comandos y las respuestas dentro del payload de paquetes ICMP Echo Request/Reply, evadiendo firewalls que solo inspeccionan capas superiores.
 
 ---
 
@@ -289,22 +291,22 @@ El proceso es análogo pero utiliza posix\_memalign para asignar memoria alinead
 
 Estos capítulos se enfocan en la integración de herramientas de escaneo de vulnerabilidades en flujos de trabajo automatizados (DevSecOps). El patrón de diseño recurrente es la separación de responsabilidades:
 
-1. **Clase Session:** Maneja la autenticación, tokens, cookies y transporte (HTTP/TCP). Implementa IDisposable para limpieza de recursos.  
+1. **Clase Session:** Maneja la autenticación, tokens, cookies y transporte (HTTP/TCP). Implementa IDisposable para limpieza de recursos.
 2. **Clase Manager:** Abstrae la lógica de negocio (CreateScan, GetReport).
 
 ### **Retos de Implementación Específicos**
 
-* **Nessus (Cap. 5):** API puramente JSON. El reto es el manejo de estado del escaneo (polling constante hasta que el estado sea "completed") para descargar el reporte.  
-* **Nexpose (Cap. 6):** API basada en XML. Requiere serialización robusta de objetos C\# a XML para configurar sitios y activos. Se destaca la generación de reportes PDF automatizados.  
-* **OpenVAS (Cap. 7):** Utiliza OMP (OpenVAS Management Protocol), un protocolo XML sobre sockets TCP puros (no HTTP). Esto obliga a implementar un cliente TCP personalizado que maneje el framing de mensajes y la validación de certificados SSL autofirmados (SslStream con RemoteCertificateValidationCallback que devuelve true).1
+- **Nessus (Cap. 5):** API puramente JSON. El reto es el manejo de estado del escaneo (polling constante hasta que el estado sea "completed") para descargar el reporte.
+- **Nexpose (Cap. 6):** API basada en XML. Requiere serialización robusta de objetos C\# a XML para configurar sitios y activos. Se destaca la generación de reportes PDF automatizados.
+- **OpenVAS (Cap. 7):** Utiliza OMP (OpenVAS Management Protocol), un protocolo XML sobre sockets TCP puros (no HTTP). Esto obliga a implementar un cliente TCP personalizado que maneje el framing de mensajes y la validación de certificados SSL autofirmados (SslStream con RemoteCertificateValidationCallback que devuelve true).1
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Caps 5-7**
 
-1. **Orquestador de Vulnerabilidades Unificado:**  
-   * *Tarea:* Diseñe una interfaz IVulnerabilityScanner con métodos como Scan(target) y GetReport(). Implemente adaptadores (Wrappers) para Nessus, Nexpose y OpenVAS.  
-   * *Objetivo:* Crear una herramienta de línea de comandos que acepte una IP y lance escaneos paralelos en las tres plataformas, normalizando los resultados en un formato JSON común.  
-2. **Análisis Diferencial de Seguridad (Diffing):**  
-   * *Tarea:* Escriba una herramienta que ingiera dos reportes XML de Nessus (Tiempo A y Tiempo B). Implemente lógica para comparar los hallazgos y generar un reporte de "Delta": nuevas vulnerabilidades aparecidas y vulnerabilidades antiguas cerradas (verificación de parches).
+1. **Orquestador de Vulnerabilidades Unificado:**
+   - _Tarea:_ Diseñe una interfaz IVulnerabilityScanner con métodos como Scan(target) y GetReport(). Implemente adaptadores (Wrappers) para Nessus, Nexpose y OpenVAS.
+   - _Objetivo:_ Crear una herramienta de línea de comandos que acepte una IP y lance escaneos paralelos en las tres plataformas, normalizando los resultados en un formato JSON común.
+2. **Análisis Diferencial de Seguridad (Diffing):**
+   - _Tarea:_ Escriba una herramienta que ingiera dos reportes XML de Nessus (Tiempo A y Tiempo B). Implemente lógica para comparar los hallazgos y generar un reporte de "Delta": nuevas vulnerabilidades aparecidas y vulnerabilidades antiguas cerradas (verificación de parches).
 
 ---
 
@@ -318,9 +320,9 @@ El desafío técnico principal es la construcción manual de peticiones HTTP mul
 
 ```C#
 
-// Estructura conceptual que el código debe replicar byte a byte  
-\--Boundary123  
-Content-Disposition: form-data; name="file"; filename="malware.exe"  
+// Estructura conceptual que el código debe replicar byte a byte
+\--Boundary123
+Content-Disposition: form-data; name="file"; filename="malware.exe"
 Content-Type: application/octet-stream
 
 \--Boundary123--
@@ -328,8 +330,8 @@ Content-Type: application/octet-stream
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 8**
 
-1. **Watchdog de Malware Automatizado:**  
-   * *Tarea:* Utilice FileSystemWatcher de C\# para monitorear un directorio "DropZone". Cuando se detecte un nuevo archivo, calcule su hash SHA256. Consulte la API de VirusTotal (investigación requerida) para ver si es conocido. Si es desconocido o limpio, súbalo automáticamente a Cuckoo Sandbox para un análisis dinámico y envíe una alerta si el reporte de Cuckoo indica comportamiento malicioso.
+1. **Watchdog de Malware Automatizado:**
+   - _Tarea:_ Utilice FileSystemWatcher de C\# para monitorear un directorio "DropZone". Cuando se detecte un nuevo archivo, calcule su hash SHA256. Consulte la API de VirusTotal (investigación requerida) para ver si es conocido. Si es desconocido o limpio, súbalo automáticamente a Cuckoo Sandbox para un análisis dinámico y envíe una alerta si el reporte de Cuckoo indica comportamiento malicioso.
 
 ---
 
@@ -341,12 +343,12 @@ sqlmap es la herramienta estándar para explotación SQLi. Este capítulo integr
 
 sqlmap puede ejecutarse en modo servidor (sqlmapapi.py). La clase SqlmapManager desarrollada se integra con el **Fuzzer SOAP** del Capítulo 3\.
 
-* **Flujo:** El fuzzer SOAP detecta una anomalía (ej. error 500 al inyectar '). En lugar de solo reportarlo, pasa el endpoint y el payload a la API de sqlmap. sqlmap verifica la vulnerabilidad, identifica el motor de base de datos y extrae una prueba de concepto (ej. banner o current\_user).
+- **Flujo:** El fuzzer SOAP detecta una anomalía (ej. error 500 al inyectar '). En lugar de solo reportarlo, pasa el endpoint y el payload a la API de sqlmap. sqlmap verifica la vulnerabilidad, identifica el motor de base de datos y extrae una prueba de concepto (ej. banner o current_user).
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 9**
 
-1. **Tamper Scripts Dinámicos y Evasión:**  
-   * *Tarea:* Implemente una lógica de reintento inteligente. Si sqlmap reporta fallo por bloqueo (ej. WAF detectado, códigos 403), la herramienta C\# debe reiniciar la tarea de sqlmap habilitando automáticamente diferentes scripts de "tamper" (ej. between, randomcase, space2comment) hasta lograr la explotación.
+1. **Tamper Scripts Dinámicos y Evasión:**
+   - _Tarea:_ Implemente una lógica de reintento inteligente. Si sqlmap reporta fallo por bloqueo (ej. WAF detectado, códigos 403), la herramienta C\# debe reiniciar la tarea de sqlmap habilitando automáticamente diferentes scripts de "tamper" (ej. between, randomcase, space2comment) hasta lograr la explotación.
 
 ---
 
@@ -354,13 +356,13 @@ sqlmap puede ejecutarse en modo servidor (sqlmapapi.py). La clase SqlmapManager 
 
 Se exploran dos paradigmas de interacción con motores antivirus open source:
 
-1. **Vía Red (clamd):** Cliente TCP que envía comandos (SCAN, VERSION) al demonio. Rápido y desacoplado.  
-2. **Vía Librería Nativa (libclamav):** Carga dinámica de libclamav.dll/.so en el proceso C\# mediante P/Invoke avanzado. Requiere gestión manual de punteros (IntPtr), compilación del motor (cl\_engine\_compile) y liberación de memoria para evitar fugas.
+1. **Vía Red (clamd):** Cliente TCP que envía comandos (SCAN, VERSION) al demonio. Rápido y desacoplado.
+2. **Vía Librería Nativa (libclamav):** Carga dinámica de libclamav.dll/.so en el proceso C\# mediante P/Invoke avanzado. Requiere gestión manual de punteros (IntPtr), compilación del motor (cl_engine_compile) y liberación de memoria para evitar fugas.
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 10**
 
-1. **Escáner de Memoria en Tiempo Real (Memory Forensics):**  
-   * *Tarea:* Utilice las APIs de Windows (OpenProcess, ReadProcessMemory) para volcar la memoria de procesos sospechosos a un buffer de bytes en su programa C\#. Pase este buffer directamente al motor de ClamAV (sin escribir en disco) para detectar firmas de malware que reside exclusivamente en memoria (fileless malware) o inyecciones de DLL (Meterpreter).
+1. **Escáner de Memoria en Tiempo Real (Memory Forensics):**
+   - _Tarea:_ Utilice las APIs de Windows (OpenProcess, ReadProcessMemory) para volcar la memoria de procesos sospechosos a un buffer de bytes en su programa C\#. Pase este buffer directamente al motor de ClamAV (sin escribir en disco) para detectar firmas de malware que reside exclusivamente en memoria (fileless malware) o inyecciones de DLL (Meterpreter).
 
 ---
 
@@ -372,14 +374,14 @@ Metasploit utiliza **MSGPACK**, un formato de serialización binaria eficiente, 
 
 La automatización permite "scripting" de ataques complejos:
 
-1. Ejecutar un exploit (module.execute).  
-2. Detectar la creación de una sesión (session.list).  
+1. Ejecutar un exploit (module.execute).
+2. Detectar la creación de una sesión (session.list).
 3. Interactuar con la sesión (session.write) para ejecutar comandos post-explotación.
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 11**
 
-1. **Bot de Fuerza Bruta Distribuida:**  
-   * *Tarea:* Diseñe una arquitectura Maestro-Esclavo. El programa C\# actúa como maestro y se conecta a múltiples servidores RPC de Metasploit (esclavos). Distribuye un diccionario de contraseñas masivo (segmentado) entre las instancias para realizar un ataque de fuerza bruta distribuido (ej. SSH o SMB) contra un objetivo, reduciendo el tiempo de ataque linealmente con el número de instancias.
+1. **Bot de Fuerza Bruta Distribuida:**
+   - _Tarea:_ Diseñe una arquitectura Maestro-Esclavo. El programa C\# actúa como maestro y se conecta a múltiples servidores RPC de Metasploit (esclavos). Distribuye un diccionario de contraseñas masivo (segmentado) entre las instancias para realizar un ataque de fuerza bruta distribuido (ej. SSH o SMB) contra un objetivo, reduciendo el tiempo de ataque linealmente con el número de instancias.
 
 ---
 
@@ -399,8 +401,8 @@ El autor guía la creación de un descompilador básico utilizando librerías de
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 13**
 
-1. **Inyector de Backdoors en IL (IL Weaving):**  
-   * *Tarea:* Utilice la librería Mono.Cecil (estándar en manipulación de IL). Escriba una herramienta que lea un binario legítimo (ej. una utilidad del sistema), localice su método Main o constructor, e inyecte instrucciones IL (OpCodes) que descarguen y ejecuten un payload desde internet, preservando la funcionalidad original del programa. Esto simula un ataque a la cadena de suministro.
+1. **Inyector de Backdoors en IL (IL Weaving):**
+   - _Tarea:_ Utilice la librería Mono.Cecil (estándar en manipulación de IL). Escriba una herramienta que lea un binario legítimo (ej. una utilidad del sistema), localice su método Main o constructor, e inyecte instrucciones IL (OpCodes) que descarguen y ejecuten un payload desde internet, preservando la funcionalidad original del programa. Esto simula un ataque a la cadena de suministro.
 
 ---
 
@@ -414,8 +416,8 @@ El objetivo práctico es extraer la **Boot Key** (Syskey) del hive SYSTEM. Esta 
 
 ### **Ejercicios de Investigación y Práctica Avanzada \- Capítulo 14**
 
-1. **Dumper de Hashes SAM Completo:**  
-   * *Tarea:* Extienda el código para leer el archivo SAM. Utilice la Boot Key extraída para desencriptar las estructuras V (donde residen los hashes) de los usuarios. Implemente los algoritmos DES/AES necesarios para obtener los hashes NTLM finales, listos para ser crackeados con Hashcat.
+1. **Dumper de Hashes SAM Completo:**
+   - _Tarea:_ Extienda el código para leer el archivo SAM. Utilice la Boot Key extraída para desencriptar las estructuras V (donde residen los hashes) de los usuarios. Implemente los algoritmos DES/AES necesarios para obtener los hashes NTLM finales, listos para ser crackeados con Hashcat.
 
 ---
 
